@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NXT GMR 🎮</title>
+  <style>
+    body {
+      margin:0;
+      font-family: Arial;
+      background: black;
+      color: white;
+      text-align: center;
+    }
+
+    header {
+      background: linear-gradient(90deg, purple, blue);
+      padding: 20px;
+      font-size: 30px;
+      font-weight: bold;
+    }
+
+    nav button {
+      margin: 10px;
+      padding: 10px 20px;
+      background: neon;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .page { display:none; padding:20px; }
+
+    .active { display:block; }
+
+    .game-box {
+      margin-top: 20px;
+      background: #111;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    canvas {
+      background: #222;
+      margin-top: 20px;
+    }
+
+    .win {
+      font-size: 25px;
+      color: lime;
+      animation: glow 1s infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 10px lime; }
+      to { text-shadow: 0 0 20px yellow; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>🚗 NXT GMR 🎮</header>
+
+<nav>
+  <button onclick="showPage('home')">Home</button>
+  <button onclick="showPage('games')">Games</button>
+</nav>
+
+<div id="home" class="page active">
+  <h2>Welcome to NXT GMR</h2>
+  <p>Play games and become a pro gamer 🔥</p>
+</div>
+
+<div id="games" class="page">
+  <h2>Car Game 🏎️</h2>
+  <button onclick="startGame()">▶ Play Game</button>
+
+  <div class="game-box">
+    <canvas id="gameCanvas" width="300" height="400"></canvas>
+    <p id="status"></p>
+  </div>
+</div>
+
+<script>
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+}
+
+let canvas = document.getElementById("gameCanvas");
+let ctx = canvas.getContext("2d");
+
+let carX = 130;
+let obstacles = [];
+let gameRunning = false;
+
+function startGame() {
+  obstacles = [];
+  carX = 130;
+  gameRunning = true;
+  document.getElementById("status").innerHTML = "";
+  gameLoop();
+}
+
+document.addEventListener("keydown", function(e) {
+  if(e.key === "ArrowLeft") carX -= 20;
+  if(e.key === "ArrowRight") carX += 20;
+});
+
+function gameLoop() {
+  if(!gameRunning) return;
+
+  ctx.clearRect(0,0,300,400);
+
+  // Draw player car
+  ctx.fillStyle = "lime";
+  ctx.fillRect(carX, 350, 40, 40);
+
+  // Add obstacles
+  if(Math.random() < 0.03) {
+    obstacles.push({x: Math.random()*260, y: 0});
+  }
+
+  // Move obstacles
+  for(let i=0;i<obstacles.length;i++) {
+    let obs = obstacles[i];
+    obs.y += 5;
+
+    ctx.fillStyle = "red";
+    ctx.fillRect(obs.x, obs.y, 40, 40);
+
+    // Collision
+    if(obs.y > 310 && obs.x < carX+40 && obs.x+40 > carX) {
+      gameRunning = false;
+      document.getElementById("status").innerHTML = "💥 Game Over!";
+      return;
+    }
+
+    // Win condition
+    if(obs.y > 400) {
+      document.getElementById("status").innerHTML = "<span class='win'>🏆 YOU WIN! 🔥</span>";
+    }
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+</script>
+
+</body>
+</html>
